@@ -92,11 +92,15 @@ const Evaluation = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedEmployee, setSelectedEmployee] = useState<typeof employees[0] | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [departmentFilter, setDepartmentFilter] = useState<string>("All");
 
   const filteredEmployees = employeeData.filter(
-    (employee) =>
-      employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      employee.id.toLowerCase().includes(searchTerm.toLowerCase())
+    (employee) => {
+      const matchesSearch = employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        employee.id.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesDepartment = departmentFilter === "All" || employee.department === departmentFilter;
+      return matchesSearch && matchesDepartment;
+    }
   );
 
   const handleEmployeeClick = (employee: typeof employees[0]) => {
@@ -152,17 +156,36 @@ const Evaluation = () => {
           </header>
 
           <main className="flex-1 p-6 space-y-6">
-            {/* Search Bar */}
+            {/* Search and Filter Bar */}
             <Card>
               <CardContent className="pt-6">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                  <Input
-                    placeholder="Search employees by name or ID..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                  />
+                <div className="flex flex-col md:flex-row gap-4">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                    <Input
+                      placeholder="Search employees by name or ID..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    {["All", "Field", "Packing"].map((dept) => (
+                      <Button
+                        key={dept}
+                        variant={departmentFilter === dept ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setDepartmentFilter(dept)}
+                        className={
+                          departmentFilter === dept 
+                            ? "bg-hris-green hover:bg-hris-green-dark text-white" 
+                            : ""
+                        }
+                      >
+                        {dept}
+                      </Button>
+                    ))}
+                  </div>
                 </div>
               </CardContent>
             </Card>
